@@ -1,6 +1,6 @@
 <template>
   <div ref="self" class="self" :style="selfStyle()">
-    <DraggableBox
+    <HandleBox
       v-for="(value, index) in handelPosition"
       ref="handle"
       :key="index"
@@ -15,7 +15,7 @@
   </div>
 </template>
 <script>
-import DraggableBox from "./DraggableBox.vue";
+import HandleBox from "./HandleBox.vue";
 import { DeepCopy } from "@/util/Util.js";
 
 const getLocalRect = (el) => {
@@ -53,7 +53,7 @@ export default {
     },
   },
   components: {
-    DraggableBox,
+    HandleBox,
   },
   computed: {},
   mounted() {
