@@ -33,10 +33,16 @@ const convertLocalPosition = (scale, transVec2, initVec2) => {
   };
 };
 
+const EVENT_STATUS = {
+  MOVE: "move",
+  STOP: "stop",
+};
+
 export default {
   name: "DraggableBox",
   data: () => {
     return {
+      status: EVENT_STATUS.STOP,
       pointer: { x: null, y: null },
       isEnter: false,
       isDown: false,
@@ -134,6 +140,11 @@ export default {
       if (type === EVENTS.DOWN && this.isEnter) {
         this.DragStart();
       }
+
+      // DragEnd
+      if (!this.isDown) {
+        this.DragEnd();
+      }
     },
 
     initPosition() {
@@ -144,7 +155,7 @@ export default {
     },
 
     DragStart() {
-      console.log("start");
+      console.log("Scale start");
       this.startVec2 = DeepCopy(this.pointer);
 
       const box = this.$refs.box.$el;
@@ -179,6 +190,15 @@ export default {
 
       if (this.callback) {
         this.callback(this.index, this.convPointer);
+      }
+      console.log("Scaling");
+      this.status = EVENT_STATUS.MOVE;
+    },
+    DragEnd() {
+      if (this.status === EVENT_STATUS.MOVE) {
+        console.log("Scale End");
+        this.status = EVENT_STATUS.STOP;
+        this.callback(null, { x: null, y: null });
       }
     },
     forceDragEnd() {

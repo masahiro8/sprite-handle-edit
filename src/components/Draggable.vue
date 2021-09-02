@@ -63,6 +63,10 @@ export default {
       type: Number,
       default: 0,
     },
+    enable: {
+      type: Boolean,
+      default: true,
+    },
   },
   components: {
     EventWrapper,
@@ -114,6 +118,7 @@ export default {
       window.removeEventListener("mouseup", this.forceDragEnd);
     },
     pointerEvent(e) {
+      if (!this.enable) return;
       this.pointer = {
         x: e.clientX,
         y: e.clientY,
@@ -124,6 +129,7 @@ export default {
       }
     },
     callbackEvent({ type, value }) {
+      if (!this.enable) return;
       if (type === EVENTS.ENTER) this.isEnter = true;
       if (type === EVENTS.DOWN) this.isDown = true;
       if (type === EVENTS.UP) this.isDown = false;

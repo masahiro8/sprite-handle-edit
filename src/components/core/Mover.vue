@@ -31,7 +31,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .boxMover {
-  position: fixed;
+  position: absolute;
   border: 1px solid blue;
 }
 </style>

@@ -9,7 +9,9 @@
     @mouseup="mouseUp"
     @dblclick="doubleClick"
     @click="click"
-  ></div>
+  >
+    <slot></slot>
+  </div>
 </template>
 <script>
 export const EVENTS = {
