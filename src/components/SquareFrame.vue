@@ -1,10 +1,11 @@
 <template>
   <Draggable
     :enable="dragEventType === DRAG_EVENT.MOVE"
-    :position="position"
+    :position="nPosition"
     :scale="scale"
+    :callback="dragCallback"
   >
-    <div ref="self" class="self" :style="selfStyle()">
+    <div ref="self" class="self">
       <HandleBox
         v-for="(value, index) in handelPosition"
         ref="handle"
@@ -14,7 +15,7 @@
         :scale="scale"
         :callback="callback"
       />
-      <div ref="wrapper" class="wrapper" :style="wrapperStyle()">
+      <div ref="wrapper" class="wrapper" :style="getRectangleStyle()">
         <slot></slot>
       </div>
     </div>
@@ -24,6 +25,7 @@
 import Draggable from "@/components/Draggable.vue";
 import HandleBox from "./HandleBox.vue";
 import { DeepCopy } from "@/util/Util.js";
+import { matrix3x3 } from "@/util/Matrix3x3.js";
 
 const DRAG_EVENT = {
   SCALE: "scale",
@@ -57,6 +59,8 @@ export default {
         { x: 0, y: 0 },
         { x: 0, y: 0 },
       ],
+      nPosition: {},
+      localPosition: {},
       dragEventType: null,
     };
   },
@@ -79,26 +83,35 @@ export default {
     HandleBox,
     Draggable,
   },
-  computed: {},
   mounted() {
     this.self = this.$refs.self.$el;
     this.wrapper = this.$refs.wrapper;
-
     this.$nextTick(() => {
       this.init();
     });
+
+    this.$watch(
+      () => this.position,
+      (newValue) => {
+        this.nPosition = newValue;
+        this.localPosition = matrix3x3(
+          [
+            [1 / this.scale, 0, 0],
+            [0, 1 / this.scale, 0],
+            [0, 0, 1],
+          ],
+          { ...newValue, z: 1 }
+        );
+      },
+      {
+        immediate: true,
+        deep: true,
+      }
+    );
   },
+  computed: {},
   methods: {
-    selfStyle() {
-      const pos = DeepCopy(this.handelPosition);
-      let style = "";
-      style += `left:0;`;
-      style += `top:0;`;
-      style += `width:${pos[2].x - pos[0].x}px;`;
-      style += `height:${pos[2].y - pos[0].y}px;`;
-      return style;
-    },
-    wrapperStyle() {
+    getRectangleStyle() {
       if (!this.initialized) return "";
       const pos = DeepCopy(this.handelPosition);
       let style = "";
@@ -107,6 +120,46 @@ export default {
       style += `width:${pos[2].x - pos[0].x}px;`;
       style += `height:${pos[2].y - pos[0].y}px;`;
       return style;
+    },
+    updateWrapperStyle() {
+      const vec2 = DeepCopy({
+        x: this.handelPosition[0].x,
+        y: this.handelPosition[0].y,
+        z: 1,
+      });
+
+      const handelPosition = DeepCopy(this.handelPosition).map((item) => {
+        return {
+          x: item.x - vec2.x,
+          y: item.y - vec2.y,
+        };
+      });
+
+      const nPosition = matrix3x3(
+        [
+          [this.scale, 0, 0],
+          [0, this.scale, 0],
+          [0, 0, 1],
+        ],
+        { ...this.localPosition, z: 1 }
+      );
+
+      this.nPosition = {
+        x: nPosition.x + vec2.x,
+        y: nPosition.y + vec2.y,
+      };
+
+      this.$nextTick(() => {
+        this.handelPosition = handelPosition;
+      });
+
+      console.log(
+        "update",
+        { ...this.nPosition },
+        { ...vec2 },
+        { ...handelPosition[0] },
+        { ...this.handelPosition[0] }
+      );
     },
     init() {
       const { left, top, width, height } = getLocalRect(this.wrapper);
@@ -122,8 +175,9 @@ export default {
     callback(index, { x, y }) {
       console.log("scale", index);
       // 停止
-      if (!index) {
+      if (index === null) {
         this.dragEventType = DRAG_EVENT.MOVE;
+        this.updateWrapperStyle();
         return;
       }
 
@@ -136,8 +190,7 @@ export default {
         this.handelPosition[3].x = x;
         this.handelPosition[3].y = this.handelPosition[2].y;
       } else if (index === 1) {
-        this.handelPosition[0].y = y;
-        this.handelPosition[2].x = x;
+        this.handelPosition[0].y = this.handelPosition[2].x = x;
       } else if (index === 2) {
         this.handelPosition[1].x = x;
         this.handelPosition[1].y = this.handelPosition[0].y;
@@ -150,17 +203,34 @@ export default {
         this.handelPosition[0].x = x;
       }
     },
+    dragCallback(index, { x, y }) {
+      console.log("dragCallback ", index, x, y);
+      this.localPosition = { x, y };
+      this.nPosition = matrix3x3(
+        [
+          [this.scale, 0, 0],
+          [0, this.scale, 0],
+          [0, 0, 1],
+        ],
+        { x, y, z: 1 }
+      );
+    },
   },
 };
 </script>
 <style lang="scss" scoped>
 .self {
-  border: 2px dashed red;
+  border: 2px dashed green;
   position: relative;
 }
 .wrapper {
   position: relative;
   display: inline-block;
   border: 1px solid red;
+}
+.rectangle {
+  position: relative;
+  display: inline-block;
+  border: 1px dashed blue;
 }
 </style>
