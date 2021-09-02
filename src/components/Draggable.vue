@@ -196,5 +196,6 @@ export default {
 .box {
   min-width: 72px;
   min-height: 72px;
+  border: 2px dashed red;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
   <div ref="stage" class="stage" :style="stageStyle">
     <!-- <HandleBox :position="position" :scale="scale" /> -->
-    <Draggable :position="position" :scale="scale"> </Draggable>
+    <!-- <Draggable :position="position" :scale="scale"> </Draggable> -->
     <!--  -->
-    <!-- <SquareHandle :scale="scale">
+    <SquareHandle :scale="scale">
       <div
         style="
           width: 100%;
@@ -13,7 +13,7 @@
           background-color: blue;
         "
       ></div>
-    </SquareHandle> -->
+    </SquareHandle>
 
     <SquareFrame :position="position" :scale="scale">
       <div
@@ -31,7 +31,7 @@
 
 <script>
 // import HandleBox from "@/components/HandleBox.vue";
-import Draggable from "@/components/Draggable.vue";
+// import Draggable from "@/components/Draggable.vue";
 import SquareHandle from "@/components/SquareHandle.vue";
 import SquareFrame from "@/components/SquareFrame.vue";
 export default {
@@ -48,7 +48,7 @@ export default {
   },
   props: {},
   components: {
-    Draggable,
+    // Draggable,
     SquareHandle,
     SquareFrame,
   },
