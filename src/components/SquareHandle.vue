@@ -1,5 +1,5 @@
 <template>
-  <div ref="self" class="self" :style="selfStyle()">
+  <div ref="self" class="self" >
     <HandleBox
       v-for="(value, index) in handelPosition"
       ref="handle"
@@ -65,21 +65,13 @@ export default {
     });
   },
   methods: {
-    selfStyle() {
-      const pos = DeepCopy(this.handelPosition);
-      let style = "";
-      style += `left:${pos[0].x}px;`;
-      style += `top:${pos[0].y}px;`;
-      style += `width:${pos[2].x - pos[0].x}px;`;
-      style += `height:${pos[2].y - pos[0].y}px;`;
-      return style;
-    },
+
     wrapperStyle() {
       if (!this.initialized) return "";
       const pos = DeepCopy(this.handelPosition);
       let style = "";
-      style += `left:0;`;
-      style += `top:0;`;
+      style += `left:${pos[0].x}px;`;
+      style += `top:${pos[0].y}px;`;
       style += `width:${pos[2].x - pos[0].x}px;`;
       style += `height:${pos[2].y - pos[0].y}px;`;
       return style;
@@ -103,6 +95,7 @@ export default {
         this.handelPosition[1].y = y;
         this.handelPosition[3].x = x;
         this.handelPosition[3].y = this.handelPosition[2].y;
+        console.log("move",x,y);
       } else if (index === 1) {
         this.handelPosition[0].y = y;
         this.handelPosition[2].x = x;
@@ -123,11 +116,13 @@ export default {
 </script>
 <style lang="scss" scoped>
 .self {
-  border: 2px dashed red;
+  border: 2px dashed green;
   position: relative;
+  width:32px;
+  height:32px;
 }
 .wrapper {
-  position: relative;
+  position: absolute;
   display: inline-block;
   border: 1px solid red;
 }

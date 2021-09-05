@@ -12,10 +12,11 @@ export default {
   },
   computed: {
     style() {
-      const rect = this.$refs.self?.getBoundingClientRect() || {
+      
+      const rect = this.$refs.self?this.$refs.self.getBoundingClientRect():{
         width: 0,
         height: 0,
-      };
+      }
       let _style = `top:${this.pointer.y - rect.height / 2}px;left:${
         this.pointer.x - rect.width / 2
       }px;`;
@@ -33,5 +34,6 @@ export default {
 .boxMover {
   position: absolute;
   border: 1px solid blue;
+  z-index:100;
 }
 </style>

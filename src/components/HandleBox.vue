@@ -130,7 +130,7 @@ export default {
         this.Dragging();
       }
     },
-    callbackEvent({ type, value }) {
+    callbackEvent({ type }) {
       if (type === EVENTS.ENTER) this.isEnter = true;
       if (type === EVENTS.DOWN) this.isDown = true;
       if (type === EVENTS.UP) this.isDown = false;
