@@ -1,27 +1,40 @@
 <template>
-  <div class="self" :style="getSelfStyle">
-    <HandleBox
-      v-for="(value, index) in handelPosition"
-      ref="handle"
-      :key="index"
-      :index="index"
-      :position="handelPosition[index]"
-      :scale="scale"
-      :rotate="transform.rotate"
-      :callback="callback"
-    />
-    <EventWrapper @callback="DragCallbackEvent">
-      <div ref="wrapper" class="wrapper" :style="wrapperStyle()">
-        <slot></slot>
-      </div>
-    </EventWrapper>
+  <div class="self">
+    <div class="rotete" :style="getSelfStyle">
+      <HandleRotate
+        ref="handleRotate"
+        :index="10"
+        :center="center"
+        :handelPosition="handelPosition"
+        :scale="scale"
+        :rotate="transform.rotate"
+        :callback="callbackRotate"
+      />
+      <HandleBox
+        v-for="(value, index) in handelPosition"
+        ref="handle"
+        :key="index"
+        :index="index"
+        :position="handelPosition[index]"
+        :scale="scale"
+        :rotate="transform.rotate"
+        :callback="callback"
+      />
+      <EventWrapper @callback="DragCallbackEvent">
+        <div ref="wrapper" class="wrapper" :style="wrapperStyle()">
+          <slot></slot>
+        </div>
+      </EventWrapper>
+    </div>
   </div>
 </template>
 <script>
   import EventWrapper, { EVENTS } from "./core/EventWrapper.vue";
   import HandleBox from "./HandleBox.vue";
+  import HandleRotate, { ROTATE_EVENT_STATUS } from "./HandleRotate.vue";
   import { DeepCopy } from "@/util/Util.js";
   import { Affin } from "@/util/Affin.js";
+  import { Crosspoint } from "@/util/Crosspoint.js";
 
   const getLocalRect = (el) => {
     const lbox = window.getComputedStyle(el, null);
@@ -42,6 +55,11 @@
       return {
         initialized: false,
         wrapper: null,
+        pointer: { x: null, y: null },
+        isEnter: false,
+        isDown: false,
+
+        // scale
         handelPosition: [
           { x: 0, y: 0 },
           { x: 0, y: 0 },
@@ -49,14 +67,13 @@
           { x: 0, y: 0 },
         ],
 
-        // draggable
-        pointer: { x: null, y: null },
-        isEnter: false,
-        isDown: false,
+        // rotate
+        dragRotateDeg: 0, // 回転ハンドルの角度量
+        styleRotateDeg: 0, // 回転量
 
+        // move
         startVec2: { x: null, y: null },
         startHandlePosition: [],
-        convPointer: { x: null, y: null },
       };
     },
     props: {
@@ -75,16 +92,25 @@
     },
     components: {
       HandleBox,
+      HandleRotate,
       EventWrapper,
     },
     computed: {
+      // selfのスタイル
       getSelfStyle() {
-        return `transform:rotate(${this.transform.rotate}deg);`;
+        return `transform-origin:${this.center.x}px ${this.center.y}px;transform:rotate(${this.styleRotateDeg}deg);`;
+      },
+
+      //オブジェクトの中心
+      center() {
+        const p = this.handelPosition;
+        return Crosspoint(p[0], p[1], p[2], p[3]);
       },
     },
 
     mounted() {
       this.wrapper = this.$refs.wrapper;
+      this.styleRotateDeg = this.transform.rotate;
 
       this.$nextTick(() => {
         this.init();
@@ -165,10 +191,6 @@
             y: item.y + y,
           };
         });
-
-        // if (this.callback) {
-        //   this.callback(this.index, this.convPointer);
-        // }
       },
 
       /**
@@ -184,6 +206,7 @@
         style += `height:${pos[2].y - pos[0].y}px;`;
         return style;
       },
+
       init() {
         if (
           this.transform &&
@@ -210,6 +233,16 @@
 
         this.initialized = true;
       },
+
+      callbackRotate(event, deg) {
+        console.log("rot", status, deg, this.styleRotateDeg);
+        if (event === ROTATE_EVENT_STATUS.START) {
+          this.dragRotateDeg = this.styleRotateDeg;
+        } else if (event === ROTATE_EVENT_STATUS.MOVE) {
+          this.styleRotateDeg = this.dragRotateDeg + deg;
+        }
+      },
+
       callback(index, { x, y }) {
         if (index === 0) {
           this.handelPosition[0].x = x;
@@ -248,6 +281,9 @@
     width: 32px;
     height: 32px;
     // transform: rotate(30deg);
+  }
+  .rotete {
+    position: absolute;
   }
   .wrapper {
     position: absolute;

@@ -23,10 +23,6 @@
       return {
         stage: null,
         scale: 0.8,
-        position: {
-          x: 130,
-          y: 130,
-        },
         transform: {
           x: 120,
           y: 130,
